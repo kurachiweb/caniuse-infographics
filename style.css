@@ -12,6 +12,11 @@ a {
     color: inherit;
 }
 
+.l_in {
+    margin: 0 auto;
+    width: 90%;
+}
+
 .l_flex {
     display: flex;
     flex-wrap: wrap;
@@ -41,4 +46,10 @@ a {
 .selectCatInput {
     font-size: 1rem;
     margin-left: 0.25rem;
+}
+
+@media screen and (min-width: 768px) {
+    .l_in {
+        width: 75%;
+    }
 }

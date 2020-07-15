@@ -177,6 +177,7 @@ fetch(new Request('caniuse.json'))
         }
 
         // カテゴリー階層をselect-optgroup-option要素に出力
+        const defaultCat = 'HTML5';
         const selectCatInput = d3.select('.options')
             .append('label')
             .attr('class', 'selectCat')
@@ -187,7 +188,8 @@ fetch(new Request('caniuse.json'))
             const eachOptG = selectCatInput.append('optgroup')
                 .attr('label', eachCat);
             data.cats[eachCat].forEach(eachSubCat => {
-                eachOptG.append('option').text(eachSubCat);
+                const subCatElem = eachOptG.append('option').text(eachSubCat);
+                if (eachSubCat === defaultCat) subCatElem.attr('selected', 'true');
             });
         });
 
@@ -201,11 +203,11 @@ fetch(new Request('caniuse.json'))
         const changeStatGraph = (opt = {}) => {
             const val = opt.value || d3.event.target.value;
             const fnArr = report.categories[val];
-            const browserObj = report.browser;
+            const browserReport = report.browser;
             const outputWrap = d3.select('.compat_rate_wrap');
 
-            for (let browserID in browserObj) {
-                const compatCount = browserObj[browserID].compatCount;
+            for (let browserID in browserReport) {
+                const compatCount = browserReport[browserID].compatCount;
                 for (let eachCompat in compatCount) compatCount[eachCompat] = 0;
             }
 
@@ -216,11 +218,11 @@ fetch(new Request('caniuse.json'))
                 const stats = fnObj.stats;
                 for (let browserID in stats) {
                     // 各機能のstatsの各ブラウザについて
-                    const latest = browserObj[browserID].latest;
+                    const latest = browserReport[browserID].latest;
                     let compatStat = stats[browserID][latest];
                     // pとnはどちらも非対応の意なので、まとめる
-                    const compatCount = browserObj[browserID].compatCount;
-                    if (compatStat === 'p') compatStat = 'n';
+                    const compatCount = browserReport[browserID].compatCount;
+                    if (compatStat[0] === 'p') compatStat = 'n';
                     compatCount[compatStat[0]]++;
                 }
             });
@@ -228,13 +230,14 @@ fetch(new Request('caniuse.json'))
             // 集計データに基づきグラフを描画
             d3.select('.func_category').text(`カテゴリー「${val}」のブラウザ対応率(全${fnArr.length}項目中)`);
             outputWrap.selectAll('*').remove();
-            for (let browserID in browserObj) {
+            for (let browserID in browserReport) {
                 const dataset = [];
-                const compatCount = browserObj[browserID].compatCount;
+                const compatCount = browserReport[browserID].compatCount;
                 for (let eachCompat in compatCount) {
+                    const compatFlag = eachCompat[0];
                     dataset.push({
-                        name: compatStatsLabel[eachCompat[0]],
-                        value: compatCount[eachCompat[0]]
+                        name: compatStatsLabel[compatFlag],
+                        value: compatCount[compatFlag]
                     });
                 }
                 const graphElem = outputWrap.append('figure')
@@ -245,7 +248,7 @@ fetch(new Request('caniuse.json'))
         };
         selectCatInput.on('change', changeStatGraph);
         // 最初はCSSの対応グラフを出しておく
-        changeStatGraph({ value: 'CSS' });
+        changeStatGraph({ value: defaultCat });
 
         // データ更新日を出力
         const lastModify = new Date(data.updated * 1000);
