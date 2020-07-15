@@ -48,6 +48,13 @@ a {
     margin-left: 0.25rem;
 }
 
+.fork_GH {
+    background-color: #bbddf5;
+    color: #1e3647;
+    padding: 0.5rem;
+    text-decoration: none;
+}
+
 @media screen and (min-width: 768px) {
     .l_in {
         width: 75%;
